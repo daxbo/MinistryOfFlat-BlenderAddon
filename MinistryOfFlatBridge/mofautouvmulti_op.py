@@ -51,7 +51,7 @@ class MOFUVMULTI_OT_Operator(bpy.types.Operator):
 			if BaseObject.type == 'MESH':
 				print("------------ Export Selected To Obj ------------")
 				BaseObject = bpy.context.selected_objects[0]
-				bpy.ops.export_scene.obj(filepath=base_file, check_existing=False, axis_forward='-Z', axis_up='Y', filter_glob="*.obj", use_selection=True, use_animation=False, use_mesh_modifiers=False, use_edges=True, use_smooth_groups=True, use_smooth_groups_bitflags=False, use_normals=True, use_uvs=True, use_materials=True, use_triangles=False, use_nurbs=False, use_vertex_groups=False, use_blen_objects=False, group_by_object=False, group_by_material=False, keep_vertex_order=True, global_scale=1, path_mode='AUTO')
+				bpy.ops.wm.obj_export(filepath=base_file, check_existing=False, forward_axis='NEGATIVE_Z', up_axis='Y', filter_glob="*.obj", export_selected_objects=True, export_animation	=False, apply_modifiers=False, export_smooth_groups=True, smooth_group_bitflags	=False, export_normals=True, export_uv	=True, export_materials=True, export_triangulated_mesh=False, export_curves_as_nurbs=False, export_vertex_groups=False, export_object_groups=False, export_material_groups=False, global_scale=1, path_mode='AUTO')
 				print("------------ Generate UVs ------------")
 				while not os.path.exists(base_file):
 					time.sleep(1)
@@ -64,7 +64,8 @@ class MOFUVMULTI_OT_Operator(bpy.types.Operator):
 					time.sleep(1)
 				if os.path.isfile(result_file):
 					if (3, 00, 0) <= bpy.app.version:
-						bpy.ops.import_scene.obj(filepath=result_file, filter_glob="*.obj", use_edges=True, use_smooth_groups=True, use_split_objects=True, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='ON', global_clamp_size=0.0, axis_forward='-Z', axis_up='Y')
+						bpy.ops.wm.obj_import(filepath=result_file, global_scale=1, clamp_size=0, forward_axis='NEGATIVE_Z', up_axis='Y', use_split_objects=True, use_split_groups=False, import_vertex_groups=False, validate_meshes=True, close_spline_loops=True, collection_separator="", filter_glob="*.obj;*.mtl")
+						# bpy.ops.import_scene.obj(filepath=result_file, filter_glob="*.obj", use_edges=True, use_smooth_groups=True, use_split_objects=True, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='ON', global_clamp_size=0.0, axis_forward='-Z', axis_up='Y')
 					else:
 						bpy.ops.import_scene.obj(filepath=result_file, filter_glob="*.obj", use_edges=True, use_smooth_groups=True, use_split_objects=True, use_split_groups=False, use_groups_as_vgroups=False, use_image_search=False, split_mode='ON', global_clight_size=0.0, axis_forward='-Z', axis_up='Y')
 				else:
