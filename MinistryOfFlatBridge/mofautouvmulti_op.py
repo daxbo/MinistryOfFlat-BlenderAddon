@@ -3,6 +3,7 @@ import os
 import subprocess
 import time
 from .mofautouv_panel import MOFUV_Properties
+import addon_utils
 
 
 class MOFUVMULTI_OT_Operator(bpy.types.Operator):
@@ -20,26 +21,46 @@ class MOFUVMULTI_OT_Operator(bpy.types.Operator):
 		separateHardEdges = mofuv_props.separateHardEdges
 		useNormalCommand = '-normals TRUE'
 		useSeperateHardEdgesCommand = '-separate FALSE'
+		UDIM = '-UDIMS 0'
+		Pack = '-PACKING True'
+		WS = '-WORLDSCALE False'
 
 		if useNormals:
 			useNormalCommand = '-normals TRUE'
 		else:
 			useNormalCommand = '-normals FALSE'
-		
+
 		if separateHardEdges:
 			useSeperateHardEdgesCommand = '-separate TRUE'
 		else:
 			useSeperateHardEdgesCommand = '-separate FALSE'
 
+
 		#Set Paths
 		if (3, 00, 0) <= bpy.app.version:
-			addonPath = bpy.utils.user_resource('SCRIPTS', path="addons")
+			for mod in addon_utils.modules():
+				if mod.bl_info['name'] == "MinistryOfFlatBridge":
+					filepath = mod.__file__
+					addonPath = os.path.dirname(filepath)
+				else:
+					pass
+			#addonPath = bpy.utils.user_resource('SCRIPTS', path="addons")
 		else:
 			addonPath = bpy.utils.user_resource('SCRIPTS', "addons")
-		mof_path = os.path.join(addonPath, 'MinistryOfFlatBridge\\mof\\UnWrapConsole3.exe')
-		base_file = os.path.join(addonPath, 'MinistryOfFlatBridge\\mof\\autoUVbase.obj')
-		result_file = os.path.join(addonPath, 'MinistryOfFlatBridge\\mof\\autoUVresult.obj')
-		command = r'"{}"'.format(mof_path) + ' ' + r'"{}"'.format(base_file) + ' ' + r'"{}"'.format(result_file) + ' ' + useNormalCommand + ' ' + useSeperateHardEdgesCommand
+		mof_path = os.path.join(addonPath, 'mof\\UnWrapConsole3.exe')
+		# base_file = os.path.join(addonPath, 'MinistryOfFlatBridge\\mof\\autoUVbase.obj')
+		#using temporary directory for base file and result file to avoid conflicts.
+		temp_dir = bpy.context.preferences.filepaths.temporary_directory
+		base_file = os.path.join(temp_dir, 'autoUVbase.obj')
+		# result_file = os.path.join(addonPath, 'MinistryOfFlatBridge\\mof\\autoUVresult.obj')
+		result_file = os.path.join(temp_dir, 'autoUVresult.obj')
+		command = r'"{}"'.format(mof_path) + ' ' + r'"{}"'.format(base_file) + ' ' + r'"{}"'.format(result_file) + ' ' + useNormalCommand + ' ' + useSeperateHardEdgesCommand + ' ' + UDIM + ' ' + Pack + ' ' + WS
+		#the final UV is bigger than 0-1 space, quick fix is to use textools fill function
+
+		if os.path.exists(mof_path):
+			pass
+		else:
+			raise ValueError(f"{mof_path} doesnt exists!")
 
 		#Execute
 		selected_obj = bpy.context.selected_objects
@@ -84,11 +105,11 @@ class MOFUVMULTI_OT_Operator(bpy.types.Operator):
 				# os.remove(base_file)
 				# os.remove(result_file)
 				print("Temporary objects have been deleted")
-		
+
 		# Select again objects
 		for j in selected_obj:
 			j.select_set(True)
-			
+
 		bpy.context.view_layer.objects.active = active_obj
 
-		return {'FINISHED'}		
+		return {'FINISHED'}
